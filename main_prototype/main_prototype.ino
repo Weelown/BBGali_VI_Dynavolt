@@ -4,10 +4,8 @@
 																		// -Tension de sortie : 5V continu (cc)
 																		// -Fréquence de 16 MHz
 
-
-
-#define TestLed 10  //Définition des pins
 #include "moteur.h"
+#define TestLed 10  //Définition des pins
 
 
 void setup() {

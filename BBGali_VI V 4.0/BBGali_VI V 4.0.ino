@@ -12,14 +12,14 @@
 
 #define RxEnable 14 //Avt
 #define TxEnable 15 
+#define VITESSE_MAX 200
+#define VITESSE_MIN 0
 
 
 
 typedef struct moteur
 {
   String m_nom;
-  int m_valeur;
-  String m_etat;
   unsigned char m_id;
 }Moteur;
 
@@ -42,15 +42,41 @@ void init_robot(Robot& monRobot)
   monRobot.m_angle = ANGLE_DEPART;
 
   monRobot.m_moteur_gauche.m_nom = "Moteur gauche"; 
-  monRobot.m_moteur_gauche.m_valeur = 0;
-  monRobot.m_moteur_gauche.m_etat = "Arret"; 
   monRobot.m_moteur_gauche.m_id = MOTEUR_GAUCHE_ID; 
 
   monRobot.m_moteur_droit.m_nom = "Moteur droit"; 
-  monRobot.m_moteur_droit.m_valeur = 0;
-  monRobot.m_moteur_droit.m_etat = "Arret"; 
   monRobot.m_moteur_droit.m_id = MOTEUR_DROIT_ID; 
 }
+
+void tourner(Robot& monRobot, float angle)
+{
+  int tps;
+  int sens;
+  if(angle < 0) {sens = 1;}
+  else {sens = 0;}
+  tps = (angle / (2 * pi)) * 1600;
+  Dynamixel.turn(monRobot.m_moteur_gauche.m_id,sens,VITESSE_MAX);
+  Dynamixel.turn(monRobot.m_moteur_droit.m_id,sens,VITESSE_MAX);
+  delay(tps);
+}
+
+void avancer(Robot& monRobot, int sens, int tps)
+{
+  if(sens == 0)
+  {
+    Dynamixel.turn(BBGali.m_moteur_gauche.m_id,0,VITESSE_MAX);
+    Dynamixel.turn(BBGali.m_moteur_droit.m_id,1,VITESSE_MAX);
+  }
+  else
+  {
+    Dynamixel.turn(BBGali.m_moteur_gauche.m_id,1,VITESSE_MAX);
+    Dynamixel.turn(BBGali.m_moteur_droit.m_id,0,VITESSE_MAX);
+  }
+  delay(tps);
+  Dynamixel.turn(BBGali.m_moteur_gauche.m_id,0,0);
+  Dynamixel.turn(BBGali.m_moteur_droit.m_id,1,0);
+}
+
 
 
 Robot BBGali;
@@ -61,21 +87,15 @@ void setup()
   Dynamixel.setEndless(3,ON);
   Dynamixel.setEndless(4,ON);
   init_robot(BBGali);
+  tourner(-1 * (pi/4));
 }
 
 void loop()
 {
-  
-Dynamixel.turn(BBGali.m_moteur_gauche.m_id,0,200);
-Dynamixel.turn(BBGali.m_moteur_droit.m_id,1,200);
-delay(2000);
-
-Dynamixel.turn(BBGali.m_moteur_gauche.m_id,1,200);
-Dynamixel.turn(BBGali.m_moteur_droit.m_id,0,200);
-delay(2000);
-
-Dynamixel.turn(BBGali.m_moteur_gauche.m_id,0,0);
-Dynamixel.turn(BBGali.m_moteur_droit.m_id,0,0);
-delay(2000);
-
+  avancer(BBGali,0,300);
+  tourner(pi/2);
+  avancer(BBGali,0,300);
+  tourner(-1 * (pi/2));
+  avancer(BBGali,0,300);
+  tourner(pi);
 }
